@@ -1,7 +1,17 @@
+/*
+ * etherRPC.ts
+ * 
+ * This file contains utility functions for lower-level blockchain interactions
+ * using the provider object from ethers.js. It abstracts Ethereum RPC calls
+ * for common operations like getting account info, sending transactions,
+ * and interacting with smart contracts.
+ */
+
 import type { IProvider } from "@web3auth/base";
 import { ethers } from "ethers";
 
 import { contractAddress, contractABI } from "./constants";
+import { AddressLike } from "ethers";
 
 const getChainId = async (provider: IProvider): Promise<string> => {
   try {
@@ -36,15 +46,16 @@ const getBalance = async (provider: IProvider): Promise<string> => {
   }
 };
 
-const sendTransaction = async (provider: IProvider): Promise<any> => {
+const sendKaiaTx = async (provider: IProvider, destination : AddressLike, amount : any): Promise<any> => {
   try {
     const ethersProvider = new ethers.BrowserProvider(provider);
     const signer = await ethersProvider.getSigner();
-    const destination = "0x75Bc50a5664657c869Edc0E058d192EeEfD570eb";
-    const amount = ethers.parseEther("1");
+
+    const amountToSend = ethers.parseEther(amount);
+        
     const tx = await signer.sendTransaction({
       to: destination,
-      value: amount,
+      value: amountToSend,
     });
     const receipt = await tx.wait();
     return receipt;
@@ -53,11 +64,11 @@ const sendTransaction = async (provider: IProvider): Promise<any> => {
   }
 };
 
-const signMessage = async (provider: IProvider): Promise<string> => {
+const signMessage = async (provider: IProvider, originalMessage : string): Promise<string> => {
   try {
     const ethersProvider = new ethers.BrowserProvider(provider);
     const signer = await ethersProvider.getSigner();
-    const originalMessage = "YOUR_MESSAGE";
+
     const signedMessage = await signer.signMessage(originalMessage);
     return signedMessage;
   } catch (error) {
@@ -65,13 +76,11 @@ const signMessage = async (provider: IProvider): Promise<string> => {
   }
 };
 
-const readFromContract = async (provider: IProvider): Promise<string> => {
+const getContractValue = async (provider: IProvider): Promise<string> => {
   try {
 
     const ethersProvider = new ethers.BrowserProvider(provider);
 
-     
-    // const contract = new Contract(contractAddress, contractABI, provider);
     const contract = new ethers.Contract(contractAddress, contractABI, ethersProvider)
   
     // Read message from smart contract
@@ -85,14 +94,12 @@ const readFromContract = async (provider: IProvider): Promise<string> => {
 
 } 
 
-const writeToContract = async (provider: IProvider, value : string): Promise<any> => {
+const setContractValue = async (provider: IProvider, value : string): Promise<any> => {
   try {
 
     const ethersProvider = new ethers.BrowserProvider(provider);
     const signer = await ethersProvider.getSigner();
 
-     
-    // const contract = new Contract(contractAddress, contractABI, provider);
     const contract = new ethers.Contract(contractAddress, contractABI, signer);
   
     // Read message from smart contract
@@ -106,4 +113,4 @@ const writeToContract = async (provider: IProvider, value : string): Promise<any
 
 } 
 
-export default { getChainId, getAccounts, getBalance, sendTransaction, signMessage, readFromContract, writeToContract };
+export default { getChainId, getAccounts, getBalance, sendKaiaTx, signMessage, getContractValue, setContractValue };

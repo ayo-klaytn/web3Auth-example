@@ -155,7 +155,10 @@ function App() {
       console.log("provider not initialized yet");
       return;
     }
-    const signedMessage = await RPC.signMessage(provider);
+    
+    const originalMessage = "YOUR_MESSAGE";
+
+    const signedMessage = await RPC.signMessage(provider, originalMessage);
     setSignedMessage(signedMessage);
     console.log("Signed Message:", signedMessage);
   };
@@ -166,24 +169,28 @@ function App() {
       return;
     }
     console.log("Sending Transaction...");
-    const receipt = await RPC.sendTransaction(provider);
+
+    const destination = "0x75Bc50a5664657c869Edc0E058d192EeEfD570eb";
+    const amount = "0.1";    
+    
+    const receipt = await RPC.sendKaiaTx(provider,destination, amount);
     setTxHash(receipt.hash);
     console.log("Transaction Receipt:", receipt);
   };
 
-  const readFromContract = async () => {
+  const getContractValue = async () => {
     if (!provider) {
       console.log("provider not initialized yet");
       return;
     }
     console.log("Reading from Contract...");
 
-    const message = await RPC.readFromContract(provider);
+    const message = await RPC.getContractValue(provider);
     setContractMessage(message);
     console.log("Read Message Receipt:", message);
   }
 
-  const writeToContract = async () => {
+  const setContractValue = async () => {
     if (!provider) {
       console.log("provider not initialized yet");
       return;
@@ -192,7 +199,7 @@ function App() {
 
     const value = "100";
 
-    const tx = await RPC.writeToContract(provider, value);
+    const tx = await RPC.setContractValue(provider, value);
     setContractTxHash(tx.hash);
 
     console.log("Transaction Receipt:", tx);
@@ -216,10 +223,10 @@ function App() {
         <button onClick={sendKaiaTx} className="btn-primary">
           Send Transaction
         </button>
-        <button onClick={readFromContract} className="btn-primary">
+        <button onClick={getContractValue} className="btn-primary">
           Read Contract Message
         </button>
-        <button onClick={writeToContract} className="btn-primary">
+        <button onClick={setContractValue} className="btn-primary">
           Write to Contract Message
         </button>
         <button onClick={logout} className="btn-secondary">
